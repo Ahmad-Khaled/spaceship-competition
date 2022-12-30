@@ -36,11 +36,19 @@ class DataFrameImputation:
     drop_string_columns (bool): whether to drop string columns (default: False)
     """
     def __init__(self, df: pd.DataFrame, impute_numeric_with_mean: bool = True, 
-                 impute_string_with_mode: bool = False, drop_string_columns: bool = True):
-        self.df = df.copy()
+                 impute_string_with_mode: bool = True, drop_string_columns: bool = False):
+        self._df = df.copy()
         self.impute_numeric_with_mean = impute_numeric_with_mean
         self.impute_string_with_mode = impute_string_with_mode
         self.drop_string_columns = drop_string_columns
+
+    @property
+    def df(self):
+        return self._df
+
+    @df.setter
+    def df(self, input_df):
+        self._df = input_df
 
     def impute_numeric_columns(self):
         """Impute the numeric columns with the mean.
@@ -57,9 +65,11 @@ class DataFrameImputation:
         """
         string_columns = self.df.select_dtypes(include=["object"]).columns
         if self.impute_string_with_mode:
-            self.df[string_columns] = self.df[string_columns].apply(lambda x: x.fillna(x.mode()))
+            for s in string_columns:
+                self.df[s] = self.df[s].fillna(self.df[s].mode()[0])
         elif self.drop_string_columns:
             self.df = self.df.dropna(subset=string_columns)
+
 
     def extract_features(self, features: list):
         """Extract the desired features from the DataFrame.
