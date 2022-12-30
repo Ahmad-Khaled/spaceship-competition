@@ -56,7 +56,8 @@ class DataFrameImputation:
         Modifies the DataFrame in place.
         """
         numeric_columns = self.df.select_dtypes(include=["int", "float"]).columns
-        self.df[numeric_columns] = self.df[numeric_columns].fillna(self.df[numeric_columns].mean())
+        for n in numeric_columns:
+            self.df[n] = self.df[n].fillna(self.df[n].mean())
 
     def impute_string_columns(self):
         """Impute the string columns with the mode, or drop them.
